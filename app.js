@@ -2,6 +2,7 @@ const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const fileUpload = require('express-fileupload');
 const session = require('express-session');
+const MemoryStore = require('memorystore')(session)
 const cookieParser = require('cookie-parser');
 const flash = require('connect-flash');
 
@@ -15,11 +16,23 @@ app.use(express.static('public'));
 app.use(expressLayouts);
 
 app.use(cookieParser('CookingBlogSecure'));
+
+// app.use(session({
+//   secret: 'CookingBlogSecretSession',
+//   saveUninitialized: true,
+//   resave: true
+// }));
+
 app.use(session({
-  secret: 'CookingBlogSecretSession',
+  cookie: { maxAge: 86400000 },
+  store: new MemoryStore({
+    checkPeriod: 86400000 // prune expired entries every 24h
+  }),
   saveUninitialized: true,
-  resave: true
-}));
+  resave: true,
+  secret: 'CookingBlogSecretSession'
+}))
+
 app.use(flash());
 app.use(fileUpload());
 
